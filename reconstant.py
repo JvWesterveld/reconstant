@@ -183,6 +183,39 @@ class VueMixinOutputer (JavascriptOutputer):
             """))
 
 
+class VhdlOutputer (Outputer):
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(comment_mark="--", comment_indentation=1, *args, **kwargs)
+
+    def output_header(self):
+        super().output_header()
+        pkg_name = self._get_pkg_name()
+        self._output.write(textwrap.dedent(f"""\
+            package {pkg_name} is
+            """))
+
+    def output_footer(self):
+        super().output_footer()
+        self._output.write("\nend package;")
+
+    def _get_pkg_name(self):
+        return os.path.splitext(os.path.basename(self.path))[0]
+
+    def output_enum(self, enum : Enum):
+        separator = ',\n\t\t'
+        self._output.write(f"\ttype {enum.name} is\n\t\t{separator.join([val for val in enum.values])}\n\tend type;\n")
+
+    def output_constant(self, constant: Constant):
+        name = inflection.underscore(constant.name).upper()
+        if type(constant.value) == str:
+            self._output.write(f'\tconstant {name} : string := "{constant.value}";\n')
+        elif type(constant.value) == int:
+            self._output.write(f'\tconstant {name} : integer := {constant.value};\n')
+        else:
+            raise Exception("Internal error - cannot handle constant type %s for VHDL", type(constant.value))
+
+
 class AllOutputs (BaseModel):
     python: Python3Outputer = None
     python2: Python2Outputer = None
@@ -191,6 +224,7 @@ class AllOutputs (BaseModel):
     c: COutputer = None
     java: JavaOutputer = None
     rust: RustOutputer = None
+    vhdl: VhdlOutputer = None
 
 
 class RootConfig (BaseModel):
