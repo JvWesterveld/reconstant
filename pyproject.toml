@@ -6,7 +6,7 @@ authors = ["Natan Yellin <aantny@gmail.com>"]
 
 [tool.poetry.dependencies]
 python = "^3.6.9"
-PyYAML = "^5.4.1"
+PyYAML = ">=5.4.1, <7.0.0"
 pydantic = "^1.8.1"
 inflection = "^0.5.1"
 
